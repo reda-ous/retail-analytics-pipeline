@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Producer",
+            "request": "launch",
+            "mainClass": "com.retailpipeline.producer.ProducerApplication",
+            "projectName": "producer"
+        },
+        {
+            "type": "java",
+            "name": "Consumer",
+            "request": "launch",
+            "mainClass": "com.retailpipeline.consumer.ConsumerApplication",
+            "projectName": "consumer"
+        }
+    ]
+}

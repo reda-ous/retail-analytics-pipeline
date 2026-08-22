@@ -1,0 +1,15 @@
+### Consumer REST API — requires the consumer module running (default port 8080),
+### with Kafka + Postgres containers up (retail-kafka, retail-postgres).
+### Open this file with the "REST Client" VS Code extension and click "Send Request"
+### above any block below.
+
+@baseUrl = http://localhost:8080
+
+### List stats for all tracked products
+GET {{baseUrl}}/api/stats/products
+
+### Get stats for a single product (adjust the id to one that actually exists)
+GET {{baseUrl}}/api/stats/products/PRD-0001
+
+### Aggregate summary across all tracked products
+GET {{baseUrl}}/api/stats/summary
