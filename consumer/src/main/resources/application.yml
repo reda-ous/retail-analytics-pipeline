@@ -2,16 +2,16 @@ spring:
   application:
     name: consumer
   datasource:
-    url: jdbc:postgresql://localhost:5432/retail
-    username: retail
-    password: retail
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:retail}
+    username: ${POSTGRES_USER:retail}
+    password: ${POSTGRES_PASSWORD:retail}
   jpa:
     hibernate:
       # dev-only shortcut: a real project would use Flyway/Liquibase migrations instead
       ddl-auto: update
     open-in-view: false
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: consumer-group
       auto-offset-reset: earliest
