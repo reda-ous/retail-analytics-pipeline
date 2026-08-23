@@ -20,7 +20,8 @@ public class KafkaEventListener {
 
     @KafkaListener(topics = "${retail.kafka.topic}", groupId = "${spring.kafka.consumer.group-id}")
     public void onEvent(SalesEvent event) {
-        log.info("Consumed event: {}", event);
+        log.info("Consumed event on {} (virtual={}): {}",
+                Thread.currentThread(), Thread.currentThread().isVirtual(), event);
         aggregationService.handle(event);
     }
 }

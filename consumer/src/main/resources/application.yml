@@ -1,6 +1,9 @@
 spring:
   application:
     name: consumer
+  threads:
+    virtual:
+      enabled: true
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:retail}
     username: ${POSTGRES_USER:retail}
@@ -21,6 +24,10 @@ spring:
         spring.json.trusted.packages: com.retailpipeline.common.event
         spring.json.value.default.type: com.retailpipeline.common.event.SalesEvent
         spring.json.use.type.headers: false
+    listener:
+      # One virtual thread per partition: a slow downstream Postgres write on one
+      # partition never blocks the other two from being consumed concurrently.
+      concurrency: 3
 
 retail:
   kafka:
