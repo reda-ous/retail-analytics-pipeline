@@ -1,5 +1,7 @@
 # retail-analytics-pipeline
 
+[![CI](https://github.com/reda-ous/retail-analytics-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/reda-ous/retail-analytics-pipeline/actions/workflows/ci.yml)
+
 A real-time retail sales event pipeline: a producer generates fake sales events, publishes them to Kafka, and a consumer aggregates them into Postgres and exposes the results over a REST API.
 
 Built to demonstrate Java 21 in a real event-driven Spring Boot system, not a toy example — real Kafka, real Postgres, and an integration test that runs against actual containers instead of mocks.
@@ -84,5 +86,4 @@ docker-compose up -d kafka postgres
 
 ## What's next
 
-- GitHub Actions CI (build, test, lint on every push)
 - A small Vue3 dashboard for live stats (optional — the backend/Kafka side is the point of this project)
