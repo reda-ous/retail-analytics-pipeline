@@ -10,6 +10,7 @@ Built to demonstrate Java 21 in a real event-driven Spring Boot system, not a to
 
 - **Producer**: every 2 seconds, fabricates one of three sales events (`OrderCreated`, `StockUpdated`, `PriceChanged`) for a small fake product catalog and publishes it to a `sales-events` Kafka topic.
 - **Consumer**: listens to that topic, aggregates events into a `product_stats` table in Postgres (orders, quantity sold, revenue, current stock, current price per product), and serves the aggregated stats over `/api/stats`.
+- **Dashboard** (optional): a small Vue3 page polling that API every 2 seconds to show live totals and a per-product table.
 
 ```mermaid
 flowchart LR
@@ -19,6 +20,7 @@ flowchart LR
     AGG --> DB[("Postgres<br/>product_stats")]
     DB --> API["REST API<br/>/api/stats/*"]
     Client(["curl / browser"]) -->|GET| API
+    API --> Dash["Dashboard (Vue3)"]
 ```
 
 ## Quick start
@@ -31,7 +33,7 @@ cd retail-analytics-pipeline
 docker-compose up -d --build
 ```
 
-That launches all four services — Kafka, Postgres, producer, consumer — with one command. Give it a few seconds, then:
+That launches all five services — Kafka, Postgres, producer, consumer, dashboard — with one command. Give it a few seconds, then either open **http://localhost:8081** for the live dashboard, or hit the API directly:
 
 ```bash
 curl http://localhost:8080/api/stats/summary
@@ -60,8 +62,7 @@ A ready-to-run [`requests.http`](requests.http) file is included for the [REST C
 ## Testing
 
 ```bash
-cd consumer
-mvn test
+./mvnw -pl consumer test
 ```
 
 [`SalesEventPipelineIntegrationTest`](consumer/src/test/java/com/retailpipeline/consumer/SalesEventPipelineIntegrationTest.java) spins up a real Kafka broker and a real Postgres instance via [Testcontainers](https://testcontainers.com/), publishes a raw event straight to Kafka (standing in for the producer), and polls the REST API until the consumer has aggregated it — no component in this test is mocked. Requires Docker running locally.
@@ -74,6 +75,7 @@ Multi-module Maven build:
 common/     shared event model (records + sealed interface), no framework dependencies beyond Jackson
 producer/   Spring Boot app — generates and publishes fake sales events
 consumer/   Spring Boot app — Kafka listener, JPA aggregation, REST API
+dashboard/  Vue3 + Vite — optional live-stats UI, not part of the Maven build
 ```
 
 ## Local development (without Docker Compose)
@@ -84,6 +86,14 @@ Handy for IDE debugging. Start just the infrastructure, then run `producer`/`con
 docker-compose up -d kafka postgres
 ```
 
-## What's next
+## Dashboard
 
-- A small Vue3 dashboard for live stats (optional — the backend/Kafka side is the point of this project)
+Polls `/api/stats/summary` and `/api/stats/products` every 2 seconds — no WebSocket/SSE, deliberately simple since the backend/Kafka side is the point of this project. To avoid needing CORS config on the consumer, requests go through a reverse proxy instead of talking cross-origin to `localhost:8080` directly: Vite's dev-server proxy locally, nginx in the built Docker image.
+
+For local frontend development without rebuilding the Docker image each time:
+
+```bash
+cd dashboard
+npm install
+npm run dev
+```

@@ -69,5 +69,14 @@ services:
     ports:
       - "8080:8080"
 
+  dashboard:
+    build:
+      context: ./dashboard
+    container_name: retail-dashboard
+    depends_on:
+      - consumer
+    ports:
+      - "8081:80"
+
 volumes:
   postgres-data:
