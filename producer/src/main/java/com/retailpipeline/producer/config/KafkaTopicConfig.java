@@ -9,11 +9,8 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class KafkaTopicConfig {
 
-    @Bean
-    public NewTopic salesEventsTopic(@Value("${retail.kafka.topic}") String topicName) {
-        return TopicBuilder.name(topicName)
-                .partitions(3)
-                .replicas(1)
-                .build();
-    }
+  @Bean
+  public NewTopic salesEventsTopic(@Value("${retail.kafka.topic}") String topicName) {
+    return TopicBuilder.name(topicName).partitions(3).replicas(1).build();
+  }
 }

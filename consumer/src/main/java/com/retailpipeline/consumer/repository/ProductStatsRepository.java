@@ -1,8 +1,6 @@
 package com.retailpipeline.consumer.repository;
 
+import com.retailpipeline.consumer.entity.ProductStats;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.retailpipeline.consumer.entity.ProductStats;
-
-public interface ProductStatsRepository extends JpaRepository<ProductStats, String> {
-}
+public interface ProductStatsRepository extends JpaRepository<ProductStats, String> {}

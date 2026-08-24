@@ -5,10 +5,5 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record PriceChanged(
-        UUID eventId,
-        Instant timestamp,
-        String productId,
-        BigDecimal oldPrice,
-        BigDecimal newPrice
-) implements SalesEvent {
-}
+    UUID eventId, Instant timestamp, String productId, BigDecimal oldPrice, BigDecimal newPrice)
+    implements SalesEvent {}
