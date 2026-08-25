@@ -52,6 +52,8 @@ A ready-to-run [`requests.http`](requests.http) file is included for the [REST C
 
 **Idempotent consumption.** Kafka only guarantees *at-least-once* delivery — a crash or rebalance between processing an event and committing its offset can redeliver the same event later. [`StatsAggregationService`](consumer/src/main/java/com/retailpipeline/consumer/service/StatsAggregationService.java) records every applied `eventId` in a `processed_event` table and skips anything already seen, in the same transaction as the stats update — verified manually by publishing one event twice and confirming it's only counted once.
 
+**Retries + a dead-letter topic.** A malformed message or a bug shouldn't get retried forever or silently vanish. [`KafkaConsumerConfig`](consumer/src/main/java/com/retailpipeline/consumer/config/KafkaConsumerConfig.java) retries a failing message 3 times with exponential backoff (500ms → 1s → 2s), then publishes it, unmodified, to `sales-events-dlt` for later inspection — verified manually with both a malformed-JSON message and a structurally-valid one that fails business logic (a missing `unitPrice`), confirming both land on the DLT and the consumer keeps processing subsequent messages normally afterward.
+
 ## Java 21 features, and where to find them
 
 | Feature | Where | Why |
