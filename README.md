@@ -40,7 +40,7 @@ curl http://localhost:8080/api/stats/summary
 curl http://localhost:8080/api/stats/products
 ```
 
-A ready-to-run [`requests.http`](requests.http) file is included for the [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) VS Code extension if you'd rather click than curl.
+A ready-to-run [`requests.http`](requests.http) file is included for the [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) VS Code extension if you'd rather click than curl. Or browse the interactive API docs at **http://localhost:8080/swagger-ui.html**.
 
 ## Why these choices
 
