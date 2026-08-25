@@ -1,6 +1,8 @@
 package com.retailpipeline.consumer.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -8,6 +10,7 @@ import com.retailpipeline.common.event.OrderCreated;
 import com.retailpipeline.common.event.PriceChanged;
 import com.retailpipeline.common.event.StockUpdated;
 import com.retailpipeline.consumer.entity.ProductStats;
+import com.retailpipeline.consumer.repository.ProcessedEventRepository;
 import com.retailpipeline.consumer.repository.ProductStatsRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -30,12 +33,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class StatsAggregationServiceTest {
 
   @Mock private ProductStatsRepository statsRepository;
+  @Mock private ProcessedEventRepository processedEventRepository;
 
   private StatsAggregationService service;
 
   @BeforeEach
   void setUp() {
-    service = new StatsAggregationService(statsRepository);
+    service = new StatsAggregationService(statsRepository, processedEventRepository);
+    when(processedEventRepository.existsById(any())).thenReturn(false);
   }
 
   @Test
@@ -100,6 +105,18 @@ class StatsAggregationServiceTest {
     service.handle(event);
 
     assertThat(capturedSave().getCurrentPrice()).isEqualByComparingTo(new BigDecimal("12.99"));
+  }
+
+  @Test
+  void duplicateEvent_isSkippedInsteadOfDoubleCounted() {
+    OrderCreated event =
+        new OrderCreated(UUID.randomUUID(), Instant.now(), "PRD-0001", 3, new BigDecimal("10.00"));
+    when(processedEventRepository.existsById(event.eventId())).thenReturn(true);
+
+    service.handle(event);
+
+    verify(statsRepository, never()).save(any());
+    verify(processedEventRepository, never()).save(any());
   }
 
   private ProductStats capturedSave() {

@@ -4,23 +4,41 @@ import com.retailpipeline.common.event.OrderCreated;
 import com.retailpipeline.common.event.PriceChanged;
 import com.retailpipeline.common.event.SalesEvent;
 import com.retailpipeline.common.event.StockUpdated;
+import com.retailpipeline.consumer.entity.ProcessedEvent;
 import com.retailpipeline.consumer.entity.ProductStats;
+import com.retailpipeline.consumer.repository.ProcessedEventRepository;
 import com.retailpipeline.consumer.repository.ProductStatsRepository;
 import java.math.BigDecimal;
+import java.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class StatsAggregationService {
 
-  private final ProductStatsRepository statsRepository;
+  private static final Logger log = LoggerFactory.getLogger(StatsAggregationService.class);
 
-  public StatsAggregationService(ProductStatsRepository statsRepository) {
+  private final ProductStatsRepository statsRepository;
+  private final ProcessedEventRepository processedEventRepository;
+
+  public StatsAggregationService(
+      ProductStatsRepository statsRepository, ProcessedEventRepository processedEventRepository) {
     this.statsRepository = statsRepository;
+    this.processedEventRepository = processedEventRepository;
   }
 
   @Transactional
   public void handle(SalesEvent event) {
+    // Kafka is at-least-once: a crash or rebalance between processing an event and
+    // committing its offset can redeliver it later. Skip anything we've already
+    // applied instead of double-counting it.
+    if (processedEventRepository.existsById(event.eventId())) {
+      log.info("Skipping already-processed event {}", event.eventId());
+      return;
+    }
+
     // Exhaustive over the sealed SalesEvent hierarchy: if a 4th event type is ever
     // added to `common`, this switch fails to compile until a case is added here.
     switch (event) {
@@ -28,6 +46,8 @@ public class StatsAggregationService {
       case StockUpdated e -> applyStockUpdated(e);
       case PriceChanged e -> applyPriceChanged(e);
     }
+
+    processedEventRepository.save(new ProcessedEvent(event.eventId(), Instant.now()));
   }
 
   private void applyOrderCreated(OrderCreated e) {

@@ -50,6 +50,8 @@ A ready-to-run [`requests.http`](requests.http) file is included for the [REST C
 
 **No Lombok.** The whole point of this project is showing off *native* Java 21 features — records, sealed interfaces, pattern matching — so generating boilerplate through annotation processing would sit oddly next to that. JPA entities use plain getters/setters instead.
 
+**Idempotent consumption.** Kafka only guarantees *at-least-once* delivery — a crash or rebalance between processing an event and committing its offset can redeliver the same event later. [`StatsAggregationService`](consumer/src/main/java/com/retailpipeline/consumer/service/StatsAggregationService.java) records every applied `eventId` in a `processed_event` table and skips anything already seen, in the same transaction as the stats update — verified manually by publishing one event twice and confirming it's only counted once.
+
 ## Java 21 features, and where to find them
 
 | Feature | Where | Why |
